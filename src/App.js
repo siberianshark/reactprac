@@ -1,25 +1,25 @@
-import React  from 'react'
+import React from 'react';
 import './index.scss';
 
 function App() {
- // let count =0;
- const[count, setCount] = React.useState(0);
-
-  const onClickPlus =  () => {
-    setCount(count + 1);
-  }
-  const onClickMinus =  () => {
-    setCount(count - 1);
-  }
-  return (
+  const[open, setOpen] = React.useState(false);
+  return(
     <div className="App">
-      <div>
-        <h2>Счетчик:</h2>
-        <h1>{count}</h1>
-        <button  onClick={onClickMinus} className="minus">- Минус</button>
-        <button  onClick={onClickPlus} className="plus">Плюс +</button>
-      </div>
-    </div>
-  );
-}
+      <button onClick={() => setOpen(true)} className="open-modal-btn">
+        ✨ Открыть окно
+        </button>
+      
+      <Modal open={open} setOpen={setOpen} >
+          <img src="https://media2.giphy.com/media/xT0xeJpnrWC4XWblEk/giphy.gif" />
+          <h3>
+          modal window
+          <button>12345546</button>
+          </h3>
+      </Modal>
+      
+      
+    </div>)}
+  ;
+
+
 export default App;
