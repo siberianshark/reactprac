@@ -1,61 +1,81 @@
 import React from 'react';
-import { Block } from './Block';
-import './index.scss';
+import  './index.scss';
+
+import {Collection} from './Collecton'
+const cats  = [
+  { "name": "Все" },
+  { "name": "Море" },
+  { "name": "Горы" },
+  { "name": "Архитектура" },
+  { "name": "Города" }
+];
 
 function App() {
-  const [fromCurrency, setFromCurrency] = React.useState('RUB');
-  const [toCurrency, setToCurrency] = React.useState('USD');
-  const [fromPrice, setFromPrice]  = React.useState(0);
-  const [toPrice, setToPrice] = React.useState(1);
-  //const [rates, setRates] = React.useState({});
-  const ratesRef = React.useRef(
-    {});
-  React.useEffect(() =>{
-    fetch(`https://cdn.cur.su/api/latest.json`)
+  const [isLoading, setIsLoadind] = React.useState(true);
+  const [categoryId, setCategoryId] = React.useState(0);
+  const [page, setPage] = React.useState(1);
+  const [searchValue, setSearchValue] = React.useState();
+  const [collections, setCollections] = React.useState([]);
+  React.useEffect(() => {
+    setIsLoadind(true);
+    const  category = categoryId ? `category=${categoryId}` : '';
+    const  pageParam = `page=${page} `;
+    fetch(
+      `https://5c3755177820ff0014d92711.mockapi.io/photo_collection?page=${page}&limit=3&${
+       category
+      }`,)
     .then((res) => res.json())
-    .then((json)=> {
-      //setRates(json.rates);
-      ratesRef.current = json.rates;
-      onChangeToPrice(1);
-    })
-      .catch(err =>{
-        console.warn(err);
-        alert('');
-      
-    });
-  
-},[]);
-
-const onChangeFromPrice = (value) => {
-  const price = value / ratesRef.current [fromCurrency];
-  const result = price * ratesRef.current [toCurrency];
-  setFromPrice(value);
-  setToPrice(result.toFixed(3));
-}
-const onChangeToPrice = (value) => {
-  const result = (ratesRef.current [fromCurrency] / ratesRef.current [toCurrency]) * value;
-  setFromPrice(result.toFixed(3));
-  setToPrice(value);
-}
-
-React.useEffect(() =>{
-  onChangeFromPrice(fromPrice)
-},[fromCurrency]);
-
-React.useEffect(() =>{
-  onChangeToPrice(toPrice)
-},[toCurrency]);
+    .then((json)=>{
+    setCollections(json);
+  })
+  .catch(err =>{
+    console.warn(err);
+    alert('');
+  }).finally(()=> {
+    setIsLoadind(false);
+  })
+}, [categoryId], page);
 
   return (
     <div className="App">
-      <Block value={fromPrice} 
-      currency={fromCurrency} 
-      onChangeCurrency={setFromCurrency} 
-      onChangeValue={onChangeFromPrice}/>
-      <Block value={toPrice} 
-      currency={toCurrency} 
-      onChangeCurrency={setToCurrency} 
-      onChangeValue={onChangeToPrice}/>
+      <h1>Моя коллекция фотографий</h1>
+      <div className="top">
+        <ul className="tags">
+           {cats.map((obj,i) => (
+           <li 
+           onClick={() => setCategoryId(i)}
+           className={categoryId===  i ? 'active' : "" } key={obj.name}>
+            {obj.name}
+            </li>
+          ))}
+        </ul>
+        <input  
+        value={searchValue}
+          onChange={e => setSearchValue(e.target.value)}
+           className="search-input" placeholder="Поиск по названию" />
+      </div>
+      <div className="content">
+        {isLoading ? (
+          <h2> Gooing </h2>
+         ) : (
+        
+        collections
+        .filter(obj =>{ return obj.name.toLowerCase().includes(searchValue.toLowerCase()); })
+        .map((obj, index) =>(
+        <Collection key ={index}
+          name={obj.name}
+          images={obj.photos}/>)
+))}
+      </div>
+      <ul className="pagination">
+        
+      {[...Array(5)]
+      .map((_, i)=> 
+      <li 
+      onClick={() => setPage(i +1)}
+      className={page=== (i+1) ? "active" : "" }>
+        {i +1}</li>)}
+      </ul>
     </div>
   );
 }
